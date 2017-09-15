@@ -1,0 +1,86 @@
+import pandas as pd
+
+# Read in excel file as data frame and parse the first sheet: 7131
+df = pd.ExcelFile('excelFile.xlsx').parse('7131')
+
+# Create an empty data frame and set the column index with a name
+lodgeDF = pd.DataFrame()
+lodgeDF['coolCash'] = lodgeDF.index
+lodgeDF['resvNum'] = lodgeDF.index
+
+# Create a list for cool cash numbers and reservation numbers to extract the columns
+coolCash1 = []
+coolCash1.append(df['Cool Cash Card'])
+resnum1 = []
+resnum1.append(df['Reservation Number'])
+
+# Add values into the columns of our empty data frame
+for i in range(len(coolCash1)):
+    lodgeDF['coolCash'] = coolCash1[i]
+    lodgeDF['resvNum'] = resnum1[i]
+
+# Remove all the commas and white spaces
+lodgeDF['coolCash'] = lodgeDF['coolCash'].str.replace("`",'')
+lodgeDF['coolCash'] = lodgeDF['coolCash'].str.replace(',','')
+lodgeDF['coolCash'] = lodgeDF['coolCash'].str.replace(' ','')
+
+# Get values in coolCash column that is greater than 16 in length
+#print(lodgeDF[lodgeDF['coolCash'].str.len()>16])
+
+# Create an empty list for extracted coolCash numbers and reservation numbers
+templist = []
+tempres = []
+
+for i in lodgeDF.index:
+    # temp hold to take value from dataframe location
+    temp = lodgeDF.iloc[i, 0]
+    if len(temp) >= 32 and len(temp) < 48:
+        hold = temp
+        temp2 = hold[:16]
+        templist.append(temp2)
+        tempres.append(lodgeDF['resvNum'][i])
+        temp3 = hold[16:32]
+        templist.append(temp3)
+        tempres.append(lodgeDF['resvNum'][i])
+    if len(temp) >= 48 and len(temp) < 64:
+        hold1 = temp
+        temp4 = hold1[:16]
+        templist.append(temp4)
+        tempres.append(lodgeDF['resvNum'][i])
+        temp5 = hold1[16:32]
+        templist.append(temp5)
+        tempres.append(lodgeDF['resvNum'][i])
+        temp6 = hold1[32:48]
+        templist.append(temp6)
+        tempres.append(lodgeDF['resvNum'][i])
+    if len(temp) >= 64:
+        hold2 = temp
+        temp7 = hold2[:16]
+        templist.append(temp7)
+        tempres.append(lodgeDF['resvNum'][i])
+        temp8 = hold2[16:32]
+        templist.append(temp8)
+        tempres.append(lodgeDF['resvNum'][i])
+        temp9 = hold2[32:48]
+        templist.append(temp9)
+        tempres.append(lodgeDF['resvNum'][i])
+        temp0 = hold2[48:64]
+        templist.append(temp0)
+        tempres.append(lodgeDF['resvNum'][i])
+
+# Remove all the values in coolCash that is not 16 characters (ie what we extracted above)
+lodgeDF = lodgeDF[lodgeDF.coolCash.str.len()==16]
+
+# Add our extracted list to a temporary dataframe
+tempDF = pd.DataFrame(templist, columns = ['coolCash'])
+tempDF['resvNum'] = tempres
+
+print(tempDF)
+
+# Combine the two dataframes together
+finalDF = pd.concat([lodgeDF, tempDF])
+
+print(finalDF)
+
+# Print to CSV File
+finalDF.to_csv('lodgingData7131.csv')
